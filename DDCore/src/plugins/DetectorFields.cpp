@@ -1,5 +1,5 @@
 //==========================================================================
-//  AIDA Detector description implementation 
+//  AIDA Detector description implementation
 //--------------------------------------------------------------------------
 // Copyright (C) Organisation europeenne pour la Recherche nucleaire (CERN)
 // All rights reserved.
@@ -18,13 +18,14 @@
 
 using namespace dd4hep;
 
-static Handle<NamedObject> convert_constant_field(Detector&, xml_h field, Handle<NamedObject> object) {
+static Handle<NamedObject> convert_constant_field(Detector &, xml_h field, Handle<NamedObject> object)
+{
   xml_doc_t doc = xml_elt_t(field).document();
-  ConstantField* fld = object.data<ConstantField>();
+  ConstantField *fld = object.data<ConstantField>();
   field.setAttr(_U(name), object->GetName());
   field.setAttr(_U(type), object->GetTitle());
   field.setAttr(_U(lunit), "mm");
-  //field.setAttr(_U(funit),"tesla");
+  // field.setAttr(_U(funit),"tesla");
   if (fld->type == CartesianField::ELECTRIC)
     field.setAttr(_U(field), "electric");
   else if (fld->type == CartesianField::MAGNETIC)
@@ -37,11 +38,12 @@ static Handle<NamedObject> convert_constant_field(Detector&, xml_h field, Handle
   field.append(strength);
   return object;
 }
-DECLARE_XML_PROCESSOR(ConstantField_Convert2Detector,convert_constant_field)
+DECLARE_XML_PROCESSOR(ConstantField_Convert2Detector, convert_constant_field)
 
-static Handle<NamedObject> convert_solenoid(Detector&, xml_h field, Handle<NamedObject> object) {
+static Handle<NamedObject> convert_solenoid(Detector &, xml_h field, Handle<NamedObject> object)
+{
   char text[128];
-  SolenoidField* fld = object.data<SolenoidField>();
+  SolenoidField *fld = object.data<SolenoidField>();
   field.setAttr(_U(name), object->GetName());
   field.setAttr(_U(type), object->GetTitle());
   field.setAttr(_U(lunit), "mm");
@@ -58,13 +60,14 @@ static Handle<NamedObject> convert_solenoid(Detector&, xml_h field, Handle<Named
   field.setAttr(_U(zmax), fld->maxZ);
   return object;
 }
-DECLARE_XML_PROCESSOR(solenoid_Convert2Detector,convert_solenoid)
-DECLARE_XML_PROCESSOR(SolenoidMagnet_Convert2Detector,convert_solenoid)
+DECLARE_XML_PROCESSOR(solenoid_Convert2Detector, convert_solenoid)
+DECLARE_XML_PROCESSOR(SolenoidMagnet_Convert2Detector, convert_solenoid)
 
-static Handle<NamedObject> convert_dipole(Detector&, xml_h field, Handle<NamedObject> object) {
+static Handle<NamedObject> convert_dipole(Detector &, xml_h field, Handle<NamedObject> object)
+{
   char text[128];
-  xml_doc_t    doc = xml_elt_t(field).document();
-  DipoleField* fld = object.data<DipoleField>();
+  xml_doc_t doc = xml_elt_t(field).document();
+  DipoleField *fld = object.data<DipoleField>();
   field.setAttr(_U(lunit), "mm");
   field.setAttr(_U(funit), "tesla");
   ::snprintf(text, sizeof(text), "%g/mm", fld->rmax);
@@ -73,22 +76,23 @@ static Handle<NamedObject> convert_dipole(Detector&, xml_h field, Handle<NamedOb
   field.setAttr(_U(zmax), dd4hep::_toDouble(text));
   ::snprintf(text, sizeof(text), "%g/mm", fld->zmin);
   field.setAttr(_U(zmin), dd4hep::_toDouble(text));
-  for (auto c : fld->coefficents )  {
+  for (auto c : fld->coefficents)
+  {
     xml_elt_t coeff = xml_elt_t(doc, _U(dipole_coeff));
     coeff.setValue(dd4hep::_toString(c));
     field.append(coeff);
   }
   return object;
 }
-DECLARE_XML_PROCESSOR(DipoleMagnet_Convert2Detector,convert_dipole)
-//DECLARE_XML_PROCESSOR(DipoleField_Convert2Detector,convert_dipole)
+DECLARE_XML_PROCESSOR(DipoleMagnet_Convert2Detector, convert_dipole)
+// DECLARE_XML_PROCESSOR(DipoleField_Convert2Detector,convert_dipole)
 
-
-static Handle<NamedObject> convert_multipole(Detector&, xml_h field, Handle<NamedObject> object) {
-  xml_doc_t       doc = xml_elt_t(field).document();
-  MultipoleField* ptr = object.data<MultipoleField>();
-  RotationZYX     rot;
-  Position        pos;
+static Handle<NamedObject> convert_multipole(Detector &, xml_h field, Handle<NamedObject> object)
+{
+  xml_doc_t doc = xml_elt_t(field).document();
+  MultipoleField *ptr = object.data<MultipoleField>();
+  RotationZYX rot;
+  Position pos;
 
   field.setAttr(_U(lunit), "mm");
   field.setAttr(_U(funit), "tesla");
@@ -99,25 +103,48 @@ static Handle<NamedObject> convert_multipole(Detector&, xml_h field, Handle<Name
   Transform3D inv = ptr->transform.Inverse();
   detail::matrix::_decompose(inv, pos, rot);
   xml_elt_t x_pos = xml_elt_t(doc, _U(position));
-  x_pos.setAttr(_U(x),pos.x());
-  x_pos.setAttr(_U(y),pos.y());
-  x_pos.setAttr(_U(z),pos.z());
+  x_pos.setAttr(_U(x), pos.x());
+  x_pos.setAttr(_U(y), pos.y());
+  x_pos.setAttr(_U(z), pos.z());
   field.append(x_pos);
 
   xml_elt_t x_rot = xml_elt_t(doc, _U(rotation));
-  x_pos.setAttr(_U(x),rot.Theta());
-  x_pos.setAttr(_U(y),rot.Phi());
-  x_pos.setAttr(_U(z),rot.Psi());
+  x_pos.setAttr(_U(x), rot.Theta());
+  x_pos.setAttr(_U(y), rot.Phi());
+  x_pos.setAttr(_U(z), rot.Psi());
   field.append(x_rot);
-  if ( ptr->volume.isValid() )  {
+  if (ptr->volume.isValid())
+  {
     // Disentangle shape ?
   }
 
-  for( double c : ptr->coefficents )  {
+  for (double c : ptr->coefficents)
+  {
     xml_dim_t x_coeff = xml_elt_t(doc, _U(coefficient));
-    x_coeff.setAttr(_U(value),c);
+    x_coeff.setAttr(_U(value), c);
     field.append(x_coeff);
   }
   return object;
 }
-DECLARE_XML_PROCESSOR(MultipoleMagnet_Convert2Detector,convert_multipole)
+DECLARE_XML_PROCESSOR(MultipoleMagnet_Convert2Detector, convert_multipole)
+
+static Handle<NamedObject> convert_toroid(Detector &, xml_h field, Handle<NamedObject> object)
+{
+  char text[128];
+  ToroidField *fld = object.data<ToroidField>();
+  field.setAttr(_U(name), object->GetName());
+  field.setAttr(_U(type), object->GetTitle());
+  field.setAttr(_U(lunit), "mm");
+  field.setAttr(_U(funit), "tesla");
+  ::snprintf(text, sizeof(text), "%g/mm", fld->outerRadius);
+  field.setAttr(_U(outer_radius), dd4hep::_toDouble(text));
+  ::snprintf(text, sizeof(text), "%g/mm", fld->innerRadius);
+  field.setAttr(_U(inner_radius), dd4hep::_toDouble(text));
+  ::snprintf(text, sizeof(text), "%g/tesla", fld->innerField);
+  field.setAttr(_U(inner_field), dd4hep::_toDouble(text));
+  field.setAttr(_U(zmin), fld->minZ);
+  field.setAttr(_U(zmax), fld->maxZ);
+  return object;
+}
+DECLARE_XML_PROCESSOR(toroid_Convert2Detector, convert_toroid)
+DECLARE_XML_PROCESSOR(ToroidMagnet_Convert2Detector, convert_toroid)
