@@ -1,5 +1,5 @@
 //==========================================================================
-//  AIDA Detector description implementation 
+//  AIDA Detector description implementation
 //--------------------------------------------------------------------------
 // Copyright (C) Organisation europeenne pour la Recherche nucleaire (CERN)
 // All rights reserved.
@@ -19,7 +19,8 @@
 #include <vector>
 
 /// Namespace for the AIDA detector description toolkit
-namespace dd4hep {
+namespace dd4hep
+{
 
   /// Implementation object of a field with constant strength
   /**
@@ -29,26 +30,29 @@ namespace dd4hep {
    *  \version 1.0
    *  \ingroup DD4HEP_CORE
    */
-  class ConstantField : public CartesianField::Object {
+  class ConstantField : public CartesianField::Object
+  {
   public:
     /// Field direction
     Direction direction;
+
   public:
     /// Initializing constructor
     ConstantField() = default;
     /// Call to access the field components at a given location
-    virtual void fieldComponents(const double* /* pos */, double* field);
+    virtual void fieldComponents(const double * /* pos */, double *field);
   };
 
   /// Implementation object of a solenoidal magnetic field.
   /**
-   *  Generic solonoid magnetic field
+   *  Generic solenoid magnetic field
    *
    *  \author  M.Frank
    *  \version 1.0
    *  \ingroup DD4HEP_CORE
    */
-  class SolenoidField : public CartesianField::Object {
+  class SolenoidField : public CartesianField::Object
+  {
   public:
     double innerField;
     double outerField;
@@ -61,7 +65,7 @@ namespace dd4hep {
     /// Initializing constructor
     SolenoidField();
     /// Call to access the field components at a given location
-    virtual void fieldComponents(const double* pos, double* field);
+    virtual void fieldComponents(const double *pos, double *field);
   };
 
   /// Implementation object of a dipole magnetic field.
@@ -72,17 +76,19 @@ namespace dd4hep {
    *  \version 1.0
    *  \ingroup DD4HEP_CORE
    */
-  class DipoleField : public CartesianField::Object {
+  class DipoleField : public CartesianField::Object
+  {
   public:
     double zmax;
     double zmin;
     double rmax;
     Coefficents coefficents;
+
   public:
     /// Initializing constructor
     DipoleField();
     /// Call to access the field components at a given location
-    virtual void fieldComponents(const double* pos, double* field);
+    virtual void fieldComponents(const double *pos, double *field);
   };
 
   /// Implementation object of a Multipole magnetic field.
@@ -147,20 +153,59 @@ namespace dd4hep {
    *  \version 1.0
    *  \ingroup DD4HEP_CORE
    */
-  class MultipoleField : public CartesianField::Object {
+  class MultipoleField : public CartesianField::Object
+  {
   public:
-    Coefficents  coefficents;
-    Coefficents  skews;
-    Solid volume;
-    Transform3D  transform;
-    double       B_z;
+    /// Multi-pole coefficients
+    Coefficents coefficents{};
+    /// Multi-pole skews
+    Coefficents skews{};
+    /// Boundary volume (optional)
+    Solid volume{};
+    /// Position transformation of the field. Only stored here for reference
+    Transform3D transform{};
+    /// Inverse position transformation of the field
+    Transform3D inverse{};
+    /// The rotation part of the transformation. Need to rotate the field
+    Rotation3D rotation{};
+    /// Constant Z field overlay
+    double B_z{0e0};
+
+  private:
+    /// The access to the field will be optimized. Remember properties.
+    unsigned char flag{0};
+    /// Translation of the transformation
+    Transform3D::Point translation{};
 
   public:
     /// Initializing constructor
     MultipoleField();
     /// Call to access the field components at a given location
-    virtual void fieldComponents(const double* pos, double* field);
+    virtual void fieldComponents(const double *pos, double *field);
   };
 
-}         /* End namespace dd4hep             */
+  /// Implementation object of a toroidal magnetic field.
+  /**
+   *  Generic toroid magnetic field
+   *
+   *  \author  F.Meloni
+   *  \version 1.0
+   */
+  class ToroidField : public CartesianField::Object
+  {
+  public:
+    double innerField;
+    double minZ;
+    double maxZ;
+    double innerRadius;
+    double outerRadius;
+
+  public:
+    /// Initializing constructor
+    ToroidField();
+    /// Call to access the field components at a given location
+    virtual void fieldComponents(const double *pos, double *field);
+  };
+
+} /* End namespace dd4hep             */
 #endif // DD4HEP_FIELDTYPES_H
