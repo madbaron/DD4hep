@@ -1833,12 +1833,15 @@ void Converter<DetElementInclude>::operator()(xml_h element) const
   if (type == "xml")
   {
     xml::DocumentHolder doc(xml::DocumentHandler().load(element, element.attr_value(_U(ref))));
+<<<<<<< HEAD
     if (s_debug.include_guard)
     {
       // Include guard, we check whether this file was already processed
       if (check_process_file(description, doc.uri()))
         return;
     }
+=======
+>>>>>>> 096b5290 (initial implementation of toroidal field)
     if (s_debug.includes)
     {
       printout(ALWAYS, "Compact", "++ Processing xml document %s.", doc.uri().c_str());
