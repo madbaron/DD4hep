@@ -216,3 +216,33 @@ void ToroidField::fieldComponents(const double *pos, double *field)
     }
   }
 }
+
+/// Initializing constructor
+ToroidField::ToroidField()
+    : innerField(0), minZ(-INFINITY), maxZ(INFINITY), innerRadius(0), outerRadius(INFINITY)
+{
+  type = CartesianField::MAGNETIC;
+}
+
+/// Compute  the field components at a given location and add to given field
+void ToroidField::fieldComponents(const double *pos, double *field)
+{
+  double z = pos[2];
+
+  if (z > minZ && z < maxZ)
+  {
+    double x = pos[0];
+    double y = pos[1];
+    double radius = std::sqrt(x * x + y * y);
+
+    if (radius > innerRadius && radius < outerRadius)
+    {
+      // Calculate the angle theta of the point(x, y) with respect to the positive x - axis
+      double theta = std::atan2(y, x);
+
+      // Calculate the magnetic field components Bx, By
+      field[0] += innerField * std::cos(theta);
+      field[1] += innerField * std::sin(theta);
+    }
+  }
+}
